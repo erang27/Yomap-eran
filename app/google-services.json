@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "296261516584",
+    "project_id": "yomap-64ac1",
+    "storage_bucket": "yomap-64ac1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:296261516584:android:8dfc22c52c6b6c0cd8241d",
+        "android_client_info": {
+          "package_name": "com.example.yomap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmYNd4yqStGDlBiccc-IRtRjIN4A6ABlM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
