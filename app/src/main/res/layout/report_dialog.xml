@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/editIssue"
+        android:layout_width="415dp"
+        android:layout_height="238dp"
+        android:ems="10"
+        android:gravity="start|top"
+        android:hint="Describe the issue"
+        android:inputType="textMultiLine"
+        app:layout_constraintBottom_toTopOf="@+id/editGroup"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/editGroup"
+        android:layout_width="414dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:hint="Group"
+        android:inputType="text"
+        app:layout_constraintBottom_toTopOf="@+id/severityBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editIssue" />
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:layout_width="153dp"
+        android:layout_height="67dp"
+        android:text="Notify Manager"
+        app:layout_constraintBottom_toTopOf="@+id/sendReport"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/sendReport"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/severityBar" />
+
+    <SeekBar
+        android:id="@+id/severityBar"
+        android:layout_width="324dp"
+        android:layout_height="55dp"
+        android:max="9"
+        app:layout_constraintBottom_toTopOf="@+id/sendReport"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editGroup" />
+
+    <Button
+        android:id="@+id/sendReport"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/severityBar" />
+
+    <TextView
+        android:id="@+id/severityDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="52dp"
+        android:text="Severity"
+        android:textSize="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/severityBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editGroup"
+        app:layout_constraintVertical_bias="0.545" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

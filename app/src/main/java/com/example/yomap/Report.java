@@ -1,33 +1,47 @@
 package com.example.yomap;
 
+import androidx.annotation.NonNull;
+
+import com.google.firebase.Timestamp;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class Report {
+    private String id;
     private String sender;
     private String issue;
     private String group;
     private int severity; //1 least severe, 10 most severe
     private int status; //0 unresolved, 1 in progress, 2 handled
-    private LocalDateTime date;
+    private com.google.firebase.Timestamp date;
 
-    public Report(String sender, String issue, String group, int severity, int status, LocalDateTime date) {
+    public Report(String sender, String issue, String group, int severity, int status) {
         this.sender = sender;
         this.issue = issue;
         this.group = group;
         this.severity = severity;
         this.status = status;
-        this.date = date;
+        this.date = com.google.firebase.Timestamp.now();
     }
 
     public Report() {
         sender = null;
         issue=null;
         group=null;
+        id = null;
         severity = 5;
         status = 0;
-        date = LocalDateTime.now();
+        date = com.google.firebase.Timestamp.now();
     }
+
+
+    public String getId() {return id;}
+
+    public void setId(String id) {this.id = id;}
 
     public String getSender() {
         return sender;
@@ -49,7 +63,7 @@ public class Report {
         return status;
     }
 
-    public LocalDateTime getDate() {
+    public Timestamp getDate() {
         return date;
     }
 
@@ -73,7 +87,13 @@ public class Report {
         this.status = status;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(Timestamp date) {
         this.date = date;
+    }
+
+    @Override
+    public String toString() {
+
+        return "sent by " + sender + " on " + UserSession.timeToString(date);
     }
 }

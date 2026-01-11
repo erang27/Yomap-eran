@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Yomap</string>
+    <string-array name="status">
+        <item>Unresolved</item>
+        <item>In progress</item>
+        <item>Resolved</item>
+    </string-array>
 </resources>

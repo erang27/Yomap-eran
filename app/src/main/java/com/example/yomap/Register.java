@@ -18,12 +18,19 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.Firebase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import org.w3c.dom.Document;
+
+import java.util.ArrayList;
 
 public class Register extends AppCompatActivity {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     EditText inputUsername, inputPassword, inputCPassword;
     Button register, login;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,24 +56,8 @@ public class Register extends AppCompatActivity {
         login.setOnClickListener(v -> finish());
     }
 
-    //create new user account and upload to firebase
-    private void createNewAccount() {
-        String username, password;
-        username = inputUsername.getText().toString();
-        password = inputPassword.getText().toString();
-        if (!password.equals(inputCPassword.getText().toString())) {
-            Toast.makeText(Register.this, "'password' and 'confirm passowrd' must contain the same input", Toast.LENGTH_SHORT).show();
-            clearAllFields();
-        }
-        else {
-            User newuser = new User(username, password);
-            db.collection("Users").document(username).set(newuser)
-                    .addOnSuccessListener(docRef -> {
-                        clearAllFields();
-                    })
-                    .addOnFailureListener(e -> Log.w("Firestore", "Error adding user", e));
-        }
-    }
+
+
 
     //clears all fields
     private void clearAllFields() {
@@ -76,9 +67,48 @@ public class Register extends AppCompatActivity {
     }
 
 
+    private void createNewAccount() {
+        String username, password, cpassword;
+        username = inputUsername.getText().toString();
+        password = inputPassword.getText().toString();
+        cpassword = inputCPassword.getText().toString();
 
+        //check if all fields are full
+        if (username.isEmpty() || password.isEmpty() || cpassword.isEmpty()) {
+            Toast.makeText(Register.this, "Some or all fields are empty", Toast.LENGTH_SHORT).show();
+        }
+        //check if password is written correctly the second time
+        else if (!password.equals(inputCPassword.getText().toString())) {
+            Toast.makeText(Register.this, "'password' and 'confirm passowrd' must contain the same input", Toast.LENGTH_SHORT).show();
+            inputCPassword.setText("");
+            inputPassword.setText("");
+        }
+        else {
+            db.collection("Users").document(username).get()
+                .addOnSuccessListener(docRef -> {
+                    if (docRef.exists()) {
+                        Toast.makeText(this, "Username taken", Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        User newuser = new User(username, password);
+                        db.collection("Users").document(username).set(newuser)
+                                .addOnSuccessListener(docRef1 -> {
+                                    clearAllFields();
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.w("erroraddfirebase", "error adding user", e);
+                                });
+                    }})
+                    .addOnFailureListener(e -> {
+                        Log.w("erroraddfirebase", "error adding user", e);
+                    });
+                }
+
+        }
 
 }
+
 
 
 
