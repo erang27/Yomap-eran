@@ -133,6 +133,9 @@ public class TeamActivity extends AppCompatActivity {
                                                 Log.w("fail adding user to team", "fail adding user to team",e);
                                             });
                                 }
+                                else {
+                                    Toast.makeText(TeamActivity.this, "User doesnt exist", Toast.LENGTH_SHORT).show();
+                                }
                             });
 
         }

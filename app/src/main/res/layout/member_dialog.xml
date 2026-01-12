@@ -3,29 +3,33 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    >
 
     <ListView
         android:id="@+id/membersList"
-        android:layout_width="404dp"
-        android:layout_height="617dp"
+        android:layout_width="403dp"
+        android:layout_height="491dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <EditText
         android:id="@+id/addUser"
         android:layout_width="308dp"
         android:layout_height="50dp"
         android:ems="10"
-        android:inputType="text"
         android:hint="New User"
+        android:inputType="text"
         app:layout_constraintBottom_toTopOf="@+id/membersList"
         app:layout_constraintEnd_toStartOf="@+id/buttonAddToTeam"
+        app:layout_constraintHorizontal_bias="0.2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.75" />
 
     <Button
         android:id="@+id/buttonAddToTeam"
@@ -35,10 +39,10 @@
         android:text="Add"
         app:layout_constraintBottom_toTopOf="@+id/membersList"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.987"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.738" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
