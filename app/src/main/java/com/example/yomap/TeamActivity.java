@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,6 +62,7 @@ public class TeamActivity extends AppCompatActivity {
         moveToReport = findViewById(R.id.buttonReports);
         id = getIntent().getStringExtra("teamId");
         username = UserSession.getUsername();
+        registerForContextMenu(membersView);
         db.collection("Teams").document(id).get()
                 .addOnSuccessListener(docRef -> {
                     team = docRef.toObject(Team.class);
@@ -107,10 +109,43 @@ public class TeamActivity extends AppCompatActivity {
                 editAddUserToTeam.setText("");
             });
 
+            //popup menu when pressing a listview item
+            membersView.setOnItemLongClickListener((parent, view, position, id) -> {
+
+                PopupMenu popup = new PopupMenu(this, view);
+                popup.inflate(R.menu.list_item_menu_members);
+
+                popup.setOnMenuItemClickListener(item -> {
+                    switch (item.getItemId()) {
+                        case R.id.action_promote:
+                            makeManager(members.get(position));
+                            return true;
+
+                        case R.id.action_delete:
+                            removeUserFromTeam(members.get(position));
+                            return true;
+                    }
+                    return false;
+                });
+
+                popup.show();
+                return true; // consume long press
+            });
+
             memberD.show(); }
     }
 
+    //Todo: check if user is already a manager
+    private void makeManager(String newmanager) {
 
+    }
+
+    //Todo
+    private void removeUserFromTeam(String user) {
+        //db.collection("Users")
+    }
+
+    
 
     private void addUserToTeam(String newuser) {
         if (newuser != null && !newuser.isBlank() && !team.isMember(newuser)) {

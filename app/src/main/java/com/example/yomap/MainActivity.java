@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     ArrayAdapter<Team> adapter;
     ArrayList<Team> teams = new ArrayList<>();
-    Button add;
+    Button add, logoutbtn;
     String username;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         //initializing components
         listView = findViewById(R.id.list);
         add =findViewById(R.id.newActivity);
+        logoutbtn = findViewById(R.id.logOut);
         username = UserSession.getUsername();
 
         //loading firebase teamlist
@@ -83,12 +84,13 @@ public class MainActivity extends AppCompatActivity {
                 });
 
 
-                            add.setOnClickListener(v-> addTeam());
-                            listView.setOnItemClickListener((parent, view, position, id) -> {
-                                Intent intent = new Intent(MainActivity.this, TeamActivity.class);
-                                intent.putExtra("teamId", teams.get(position).getId());
-                                activityResultLauncher.launch(intent);
-                            });
+        add.setOnClickListener(v-> addTeam());
+        logoutbtn.setOnClickListener(v-> logOut());
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            Intent intent = new Intent(MainActivity.this, TeamActivity.class);
+            intent.putExtra("teamId", teams.get(position).getId());
+            activityResultLauncher.launch(intent);
+        });
 
 
     }
@@ -122,6 +124,15 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+
+    //deletes all other activities and opens Login
+    private void logOut() {
+        Intent intent = new Intent(this, Login.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        activityResultLauncher.launch(intent);
+        finish();
     }
 
     private ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
