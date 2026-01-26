@@ -62,7 +62,7 @@ public class TeamActivity extends AppCompatActivity {
         moveToReport = findViewById(R.id.buttonReports);
         id = getIntent().getStringExtra("teamId");
         username = UserSession.getUsername();
-        registerForContextMenu(membersView);
+        //registerForContextMenu(membersView);
         db.collection("Teams").document(id).get()
                 .addOnSuccessListener(docRef -> {
                     team = docRef.toObject(Team.class);
@@ -116,14 +116,13 @@ public class TeamActivity extends AppCompatActivity {
                 popup.inflate(R.menu.list_item_menu_members);
 
                 popup.setOnMenuItemClickListener(item -> {
-                    switch (item.getItemId()) {
-                        case R.id.action_promote:
-                            makeManager(members.get(position));
-                            return true;
-
-                        case R.id.action_delete:
-                            removeUserFromTeam(members.get(position));
-                            return true;
+                    if(item.getItemId()==R.id.action_promote) {
+                        makeManager(members.get(position));
+                        return true;
+                    }
+                    else if (item.getItemId() == R.id.action_delete) {
+                        removeUserFromTeam(members.get(position));
+                        return true;
                     }
                     return false;
                 });

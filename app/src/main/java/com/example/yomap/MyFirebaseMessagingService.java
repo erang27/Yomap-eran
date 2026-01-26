@@ -2,9 +2,13 @@ package com.example.yomap;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -25,6 +29,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService { //AI 
                     message.getNotification().getTitle(),
                     message.getNotification().getBody()
             );
+        }
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.PUSH_NOTIFICATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions((Activity).getApplicationContext(), new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
         }
     }
 

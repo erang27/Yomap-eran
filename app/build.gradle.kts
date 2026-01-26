@@ -41,6 +41,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation ("com.google.firebase:firebase-messaging:23.4.1")
     implementation ("com.google.firebase:firebase-functions:21.0.0")
+    implementation ("com.google.firebase:firebase-analytics:22.1.2")
+    implementation ("com.google.firebase:firebase-messaging:24.1.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
