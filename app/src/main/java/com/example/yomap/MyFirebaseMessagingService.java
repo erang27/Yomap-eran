@@ -1,5 +1,6 @@
 package com.example.yomap;
 
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -13,8 +14,9 @@ import androidx.core.content.ContextCompat;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import android.Manifest;
 
-public class MyFirebaseMessagingService extends FirebaseMessagingService { //AI generated
+public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "FCM";
 
@@ -34,13 +36,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService { //AI 
 
     private void requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= 33) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.PUSH_NOTIFICATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions((Activity).getApplicationContext(), new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions((Activity) getApplicationContext(), new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
             }
         }
     }
 
     private void showNotification(String title, String body) {
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestNotificationPermission();
+            }
+        }
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this, "general_channel")
                         .setSmallIcon(R.drawable.ic_notification)
