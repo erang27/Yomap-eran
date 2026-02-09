@@ -82,7 +82,7 @@ public class ReportsActivity extends AppCompatActivity {
         //initializing components
         back = findViewById(R.id.backToTeam);
         newreport = findViewById(R.id.buttonNewReport);
-        listViewReports = findViewById(R.id.reportList); //TODO: making a dialog pop up when pressing an item
+        listViewReports = findViewById(R.id.reportList);
         sortby = findViewById(R.id.spinner);
         username = UserSession.getUsername();
         id = getIntent().getStringExtra("teamId");

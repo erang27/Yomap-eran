@@ -42,7 +42,7 @@ public class TeamActivity extends AppCompatActivity {
     Button goHome, showMembers, moveToReport,addUserToTeam;
     String id, username;
     Team team;
-    boolean isManager;
+    boolean isManager, isFounder;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +68,7 @@ public class TeamActivity extends AppCompatActivity {
                     team = docRef.toObject(Team.class);
                     teamView.setText(team.getTitle());
                     isManager = team.isManager(username);
+                    isFounder = team.isFounder(username);
                 })
                 .addOnFailureListener(e -> Log.w("failgettingteam", "fail getting team", e));
 
@@ -134,18 +135,38 @@ public class TeamActivity extends AppCompatActivity {
             memberD.show(); }
     }
 
-    //Todo: check if user is already a manager
+    //if the selected user isnt already a manager, they becomes one.
     private void makeManager(String newmanager) {
-
+        if (team.isManager(newmanager)) {
+            Toast.makeText(this, "user is already a manager", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            db.collection("Teams").document(id).update("managers", FieldValue.arrayUnion(newmanager))
+                            .addOnSuccessListener(docRef -> {
+                                team.addManagers(newmanager);
+                            })
+                            .addOnFailureListener(e-> {
+                                Log.w("MAKE_MANAGER", "makeManager failed", e);
+                                    });
+            team.addManagers(newmanager);
+        }
     }
 
-    //Todo
-    private void removeUserFromTeam(String user) {
-        //db.collection("Users")
+    //removes a user from the team //TODO: handle removing managers as the founder
+    private void removeUserFromTeam(String exuser) {
+        db.collection("Users").document(exuser).update("teamIds", FieldValue.arrayRemove(id))
+                .addOnSuccessListener(docRef -> {
+                    db.collection("Teams").document(id).update("users", FieldValue.arrayRemove(exuser))
+                            .addOnSuccessListener(docRef1 -> {
+                                team.removeMember(exuser);
+                                members.remove(exuser);
+                                adapter.notifyDataSetChanged();
+                            });
+                });
     }
 
     
-
+    //gets a string, if it's linked to an actual username, the user is added to the team
     private void addUserToTeam(String newuser) {
         if (newuser != null && !newuser.isBlank() && !team.isMember(newuser)) {
 

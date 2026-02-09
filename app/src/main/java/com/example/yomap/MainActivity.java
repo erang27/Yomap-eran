@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     //opens a new team and adds it to firebase and listview
-    //ttodo: limit each user to 10 teams
+    //todo: limit each user to 10 teams
     private void addTeam() {
         EditText input = new EditText(this);
 
@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
                     Team newTeam = new Team(input.getText().toString());
                     newTeam.addManagers(username); //set the opener of the team as the manager
                     newTeam.addUsers(username);
+                    newTeam.setFounder(username);
                     db.collection("Teams").
                             add(newTeam)
                             .addOnSuccessListener(docRef -> {

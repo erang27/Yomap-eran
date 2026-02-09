@@ -8,18 +8,21 @@ import java.util.List;
 public class Team {
     private String title;
     private String id;
+    private String founder;
     private List<String> managers;
     private List<String> users;
     private List<Report> reports;
 
     public Team(String title) {
         this.title = title;
+        this.founder = "";
         users = new ArrayList<>();
         managers = new ArrayList<>();
         reports = new ArrayList<>();
     }
     public Team() {
         title = "my ken";
+        this.founder ="";
         managers = new ArrayList<>();
         users = new ArrayList<>();
         reports = new ArrayList<>();
@@ -59,6 +62,10 @@ public class Team {
     @PropertyName("users")
     public void setMembers(List<String> users) { this.users = users; }
 
+    public String getFounder() {return founder;}
+
+    public void setFounder(String founder) {this.founder = founder;}
+
     public void setId(String id) {this.id = id;}
     public String getId() {return id;}
 
@@ -76,6 +83,23 @@ public class Team {
             if (username.equals(users.get(i))) return true;
         }
         return false;
+    }
+
+    //removes a user from the team
+    public void removeMember(String exmember) {
+        boolean found = false;
+        for (int i = 0; i < users.size() && !found; i++) {
+            if (exmember.equals(users.get(i))) {
+                users.remove(i);
+                found = true;
+            }
+        }
+    }
+
+    //checks if user if the founder of the team
+    public boolean isFounder(String username) {
+        if (username==null) return false;
+        return username.equals(founder);
     }
 
     @Override
