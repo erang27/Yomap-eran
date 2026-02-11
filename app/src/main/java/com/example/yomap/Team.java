@@ -96,6 +96,17 @@ public class Team {
         }
     }
 
+    //demotes a manager to a regular member
+    public void demoteManager(String exmanager) {
+        boolean found = false;
+        for (int i = 0; i < managers.size() && !found; i++) {
+            if (exmanager.equals(managers.get(i))) {
+                managers.remove(i);
+                found = true;
+            }
+        }
+    }
+
     //checks if user if the founder of the team
     public boolean isFounder(String username) {
         if (username==null) return false;

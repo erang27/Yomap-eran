@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.ArrayAdapter;
@@ -115,6 +116,14 @@ public class TeamActivity extends AppCompatActivity {
 
                 PopupMenu popup = new PopupMenu(this, view);
                 popup.inflate(R.menu.list_item_menu_members);
+                Menu menu = popup.getMenu();
+                //todo: make the popup specific to scenerios of manager and founder, also to self
+                if (team.isManager(members.get(position))) {
+                    menu.findItem(R.id.action_promote).setEnabled(false);
+                    menu.findItem(R.id.action_demote).setEnabled(isFounder);
+                    menu.findItem(R.id.action_delete).setEnabled(isFounder);
+                }
+
 
                 popup.setOnMenuItemClickListener(item -> {
                     if(item.getItemId()==R.id.action_promote) {
@@ -123,6 +132,10 @@ public class TeamActivity extends AppCompatActivity {
                     }
                     else if (item.getItemId() == R.id.action_delete) {
                         removeUserFromTeam(members.get(position));
+                        return true;
+                    }
+                    else if (item.getItemId() == R.id.action_demote) {
+                        demoteManager(members.get(position));
                         return true;
                     }
                     return false;
@@ -152,8 +165,19 @@ public class TeamActivity extends AppCompatActivity {
         }
     }
 
+    //takes away the manager role from a user
+    private void demoteManager(String exmanager) {
+        db.collection("Teams").document(id).update("managers", FieldValue.arrayRemove(exmanager))
+                .addOnSuccessListener(docRef-> {
+                    team.demoteManager(exmanager);
+                    //update the listview color
+                });
+
+    }
+
     //removes a user from the team //TODO: handle removing managers as the founder
     private void removeUserFromTeam(String exuser) {
+
         db.collection("Users").document(exuser).update("teamIds", FieldValue.arrayRemove(id))
                 .addOnSuccessListener(docRef -> {
                     db.collection("Teams").document(id).update("users", FieldValue.arrayRemove(exuser))
