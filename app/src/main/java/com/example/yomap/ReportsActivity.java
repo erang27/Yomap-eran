@@ -222,7 +222,7 @@ public class ReportsActivity extends AppCompatActivity {
                 .add(newreport).addOnSuccessListener(docRef -> {
                     newreport.setId(docRef.getId());
                     reports.add(newreport);
-                    if (checkBox.isChecked()) { //notifyManagers(newreport); TODO: notifications
+                    if (checkBox.isChecked()) { notifyManagers(newreport);
                          }
                     reportD.dismiss();
                     adapter.notifyDataSetChanged();
@@ -234,19 +234,20 @@ public class ReportsActivity extends AppCompatActivity {
         db.collection("Teams").document(id).get()
                 .addOnSuccessListener(docRef -> {
                     team = docRef.toObject(Team.class);
+                    List<String> managers = team.getManagers();
+                    for (int i = 0; i< managers.size(); i++) {
+                        FirebaseFunctions.getInstance()
+                                .getHttpsCallable("notifyUserByUsername")
+                                .call(Collections.singletonMap("username", managers.get(i)))
+                                .addOnSuccessListener(result -> {
+                                    Log.d("FCM", "Notification sent");
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("FCM", "Error calling function", e);
+                                });
+                    }
                 })
                 .addOnFailureListener(e-> Log.w("NOTIFICATion", "fail to notify user", e));
-        List<String> managers = team.getManagers();
-        for (int i = 0; i< managers.size(); i++) {
-            FirebaseFunctions.getInstance()
-                    .getHttpsCallable("notifyUserByUsername")
-                    .call(Collections.singletonMap("username", username))
-            .addOnSuccessListener(result -> {
-                Log.d("FCM", "Notification sent");
-            })
-                    .addOnFailureListener(e -> {
-                        Log.e("FCM", "Error calling function", e);
-                    });
-        }
+
     }
 }

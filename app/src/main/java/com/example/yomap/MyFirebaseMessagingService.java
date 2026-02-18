@@ -16,16 +16,18 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import android.Manifest;
 
+import javax.annotation.Nonnull;
+
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "FCM";
 
     @Override
     public void onMessageReceived(RemoteMessage message) {
-        super.onMessageReceived(message);
+        /*super.onMessageReceived(message);
 
         Log.d(TAG, "Message received");
-
+*/
         if (message.getNotification() != null) {
             showNotification(
                     message.getNotification().getTitle(),
@@ -34,21 +36,21 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private void requestNotificationPermission() {
+    /*private void requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= 33) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                //TODO: figure out this line:
-                //ActivityCompat.requestPermissions((Activity) getApplicationContext(), new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+
+                ActivityCompat.requestPermissions((Activity) getApplicationContext(), new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
             }
         }
-    }
+    } */
 
     private void showNotification(String title, String body) {
-        if (Build.VERSION.SDK_INT >= 33) {
+        /*if (Build.VERSION.SDK_INT >= 33) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 requestNotificationPermission();
             }
-        }
+        } */
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this, "general_channel")
                         .setSmallIcon(R.drawable.ic_notification)
@@ -63,13 +65,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     @Override
-    public void onNewToken(String token) {
-        super.onNewToken(token);
+    public void onNewToken(@Nonnull String token) {
+        /*super.onNewToken(token);
         String username = UserSession.getUsername();
         FirebaseFirestore.getInstance()
                 .collection("Users")
                 .document(username)
-                .update("fcmToken", token);
+                .update("fcmToken", token); */
 
         Log.d("FCM_TOKEN", token);
     }

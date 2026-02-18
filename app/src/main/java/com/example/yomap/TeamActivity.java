@@ -113,37 +113,42 @@ public class TeamActivity extends AppCompatActivity {
 
             //popup menu when pressing a listview item
             membersView.setOnItemLongClickListener((parent, view, position, id) -> {
+                        if (isManager) {
+                            PopupMenu popup = new PopupMenu(this, view);
+                            popup.inflate(R.menu.list_item_menu_members);
+                            Menu menu = popup.getMenu();
+                            //todo: make the popup specific to scenerios of manager and founder, also to self
+                            if (!isManager) {
 
-                PopupMenu popup = new PopupMenu(this, view);
-                popup.inflate(R.menu.list_item_menu_members);
-                Menu menu = popup.getMenu();
-                //todo: make the popup specific to scenerios of manager and founder, also to self
-                if (team.isManager(members.get(position))) {
-                    menu.findItem(R.id.action_promote).setEnabled(false);
-                    menu.findItem(R.id.action_demote).setEnabled(isFounder);
-                    menu.findItem(R.id.action_delete).setEnabled(isFounder);
-                }
+                            }
+                            if (team.isManager(members.get(position))) {
+                                menu.findItem(R.id.action_promote).setVisible(false);
+                                menu.findItem(R.id.action_demote).setVisible(isFounder);
+                                menu.findItem(R.id.action_delete).setVisible(isFounder);
+                            }
 
 
-                popup.setOnMenuItemClickListener(item -> {
-                    if(item.getItemId()==R.id.action_promote) {
-                        makeManager(members.get(position));
-                        return true;
-                    }
-                    else if (item.getItemId() == R.id.action_delete) {
-                        removeUserFromTeam(members.get(position));
-                        return true;
-                    }
-                    else if (item.getItemId() == R.id.action_demote) {
-                        demoteManager(members.get(position));
-                        return true;
-                    }
-                    return false;
-                });
+                            popup.setOnMenuItemClickListener(item -> {
+                                if (item.getItemId() == R.id.action_promote) {
+                                    makeManager(members.get(position));
+                                    return true;
+                                } else if (item.getItemId() == R.id.action_delete) {
+                                    removeUserFromTeam(members.get(position));
+                                    return true;
+                                } else if (item.getItemId() == R.id.action_demote) {
+                                    demoteManager(members.get(position));
+                                    return true;
+                                }
+                                return false;
+                            });
 
-                popup.show();
-                return true; // consume long press
+                            popup.show();
+                            return true; // consume long press
+                        }
+                        return false;
             });
+
+
 
             memberD.show(); }
     }
