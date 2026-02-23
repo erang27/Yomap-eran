@@ -40,7 +40,7 @@ public class TeamActivity extends AppCompatActivity {
     ArrayList<String> members;
     TextView teamView;
     EditText editAddUserToTeam;
-    Button goHome, showMembers, moveToReport,addUserToTeam;
+    Button goHome, showMembers, moveToReport,addUserToTeam, buttonLeave, buttonRemove;
     String id, username;
     Team team;
     boolean isManager, isFounder;
@@ -70,6 +70,10 @@ public class TeamActivity extends AppCompatActivity {
                     teamView.setText(team.getTitle());
                     isManager = team.isManager(username);
                     isFounder = team.isFounder(username);
+                    if (isFounder) {
+                        buttonRemove.setVisibility(View.VISIBLE);
+                    }
+                    else buttonRemove.setVisibility(View.GONE);
                 })
                 .addOnFailureListener(e -> Log.w("failgettingteam", "fail getting team", e));
 
@@ -81,6 +85,8 @@ public class TeamActivity extends AppCompatActivity {
             intent.putExtra("teamId", id);
             activityResultLauncher.launch(intent);
         });
+        buttonLeave.setOnClickListener(v -> leaveTeam());
+        buttonRemove.setOnClickListener(v-> deleteTeam());
     }
 
     private void memberDialog() {
@@ -113,21 +119,23 @@ public class TeamActivity extends AppCompatActivity {
 
             //popup menu when pressing a listview item
             membersView.setOnItemLongClickListener((parent, view, position, id) -> {
-                        if (isManager) {
+                String selectedUser = members.get(position);
+                        if (isManager && selectedUser.equals(username) && team.isFounder(selectedUser))
+                            //only managers have access to the popup, and it is impossible to commit actions on yourself or on the founder
+                        {
                             PopupMenu popup = new PopupMenu(this, view);
                             popup.inflate(R.menu.list_item_menu_members);
                             Menu menu = popup.getMenu();
-                            //todo: make the popup specific to scenerios of manager and founder, also to self
-                            if (!isManager) {
-
-                            }
-                            if (team.isManager(members.get(position))) {
+                            if (team.isManager(selectedUser)) {
                                 menu.findItem(R.id.action_promote).setVisible(false);
                                 menu.findItem(R.id.action_demote).setVisible(isFounder);
                                 menu.findItem(R.id.action_delete).setVisible(isFounder);
                             }
-
-
+                            else {
+                                menu.findItem(R.id.action_promote).setVisible(isFounder);
+                                menu.findItem(R.id.action_demote).setVisible(false);
+                                menu.findItem(R.id.action_delete).setVisible(true);
+                            }
                             popup.setOnMenuItemClickListener(item -> {
                                 if (item.getItemId() == R.id.action_promote) {
                                     makeManager(members.get(position));
@@ -180,7 +188,7 @@ public class TeamActivity extends AppCompatActivity {
 
     }
 
-    //removes a user from the team //TODO: handle removing managers as the founder
+    //removes a user from the team
     private void removeUserFromTeam(String exuser) {
 
         db.collection("Users").document(exuser).update("teamIds", FieldValue.arrayRemove(id))
@@ -190,8 +198,40 @@ public class TeamActivity extends AppCompatActivity {
                                 team.removeMember(exuser);
                                 members.remove(exuser);
                                 adapter.notifyDataSetChanged();
+                                if (team.isManager(exuser)) {demoteManager(exuser); } //if a founder removes a manager
                             });
                 });
+    }
+
+    //leaving the team requires a handling for a case of the founder leaving
+    private void leaveTeam() {
+        if (isFounder) {
+            if (team.getManagers().size()>=2) {
+                team.setFounder(team.getManagers().get(1));
+            }
+            else if (team.getMembers().size()>=2) {
+                makeManager(team.getMembers().get(1));
+            }
+            else deleteTeam(); //if there are no other members, the team is removed when the founder leaves
+        }
+        removeUserFromTeam(username);
+        finish();
+    }
+
+    //erases the team by kicking all of the users out
+    private void deleteTeam() {
+        for (int i = 0; i<members.size(); i++) {
+            removeUserFromTeam(members.get(i));
+        }
+        db.collection("Teams").document(id).delete()
+                .addOnSuccessListener(docRef -> {
+                    Log.w("DELETE_TEAM", "team removed successfully");
+                    Toast.makeText(this, "team successfully removed", Toast.LENGTH_LONG).show();
+                })
+                .addOnFailureListener(e -> {
+                    Log.w("DELETE_TEAM", "team couldnt be removed", e);
+                });
+        finish();
     }
 
     
