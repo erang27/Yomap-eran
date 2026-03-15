@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.FieldValue;
@@ -35,8 +36,8 @@ import java.util.List;
 public class TeamActivity extends AppCompatActivity {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     Dialog memberD;
-    ListView membersView;
-    ArrayAdapter<String> adapter;
+    RecyclerView membersView;
+    myAdapter<String> adapter;
     ArrayList<String> members;
     TextView teamView;
     EditText editAddUserToTeam;
@@ -61,6 +62,8 @@ public class TeamActivity extends AppCompatActivity {
         showMembers = findViewById(R.id.showMembers);
         goHome = findViewById(R.id.buttonHome);
         moveToReport = findViewById(R.id.buttonReports);
+        buttonLeave = findViewById(R.id.leaveTeam);
+        buttonRemove = findViewById(R.id.removeTeam);
         id = getIntent().getStringExtra("teamId");
         username = UserSession.getUsername();
         //registerForContextMenu(membersView);
@@ -90,15 +93,18 @@ public class TeamActivity extends AppCompatActivity {
     }
 
     private void memberDialog() {
-        if (team!=null) {
+        if (team != null) {
             memberD = new Dialog(this);
             memberD.setContentView(R.layout.member_dialog);
             memberD.setTitle("Members");
             memberD.setCancelable(true);
             membersView = memberD.findViewById(R.id.membersList);
+            membersView.setLayoutManager(new LinearLayoutManager(this));
             members = new ArrayList<>(team.getMembers());
-            adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, members);
+            adapter = new myAdapter(members, position -> {
+            }, (view,position) -> popupMembers(view, position));
             membersView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
             addUserToTeam = memberD.findViewById(R.id.buttonAddToTeam);
             editAddUserToTeam = memberD.findViewById(R.id.addUser);
 
@@ -106,8 +112,7 @@ public class TeamActivity extends AppCompatActivity {
             if (isManager) {
                 addUserToTeam.setVisibility(View.VISIBLE);
                 editAddUserToTeam.setVisibility(View.VISIBLE);
-            }
-            else {
+            } else {
                 addUserToTeam.setVisibility(View.GONE);
                 editAddUserToTeam.setVisibility(View.GONE);
             }
@@ -116,50 +121,47 @@ public class TeamActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 editAddUserToTeam.setText("");
             });
-
-            //popup menu when pressing a listview item
-            membersView.setOnItemLongClickListener((parent, view, position, id) -> {
-                String selectedUser = members.get(position);
-                        if (isManager && selectedUser.equals(username) && team.isFounder(selectedUser))
-                            //only managers have access to the popup, and it is impossible to commit actions on yourself or on the founder
-                        {
-                            PopupMenu popup = new PopupMenu(this, view);
-                            popup.inflate(R.menu.list_item_menu_members);
-                            Menu menu = popup.getMenu();
-                            if (team.isManager(selectedUser)) {
-                                menu.findItem(R.id.action_promote).setVisible(false);
-                                menu.findItem(R.id.action_demote).setVisible(isFounder);
-                                menu.findItem(R.id.action_delete).setVisible(isFounder);
-                            }
-                            else {
-                                menu.findItem(R.id.action_promote).setVisible(isFounder);
-                                menu.findItem(R.id.action_demote).setVisible(false);
-                                menu.findItem(R.id.action_delete).setVisible(true);
-                            }
-                            popup.setOnMenuItemClickListener(item -> {
-                                if (item.getItemId() == R.id.action_promote) {
-                                    makeManager(members.get(position));
-                                    return true;
-                                } else if (item.getItemId() == R.id.action_delete) {
-                                    removeUserFromTeam(members.get(position));
-                                    return true;
-                                } else if (item.getItemId() == R.id.action_demote) {
-                                    demoteManager(members.get(position));
-                                    return true;
-                                }
-                                return false;
-                            });
-
-                            popup.show();
-                            return true; // consume long press
-                        }
-                        return false;
+            memberD.show();
+        }
+    }
+    //handle click on member
+    private void popupMembers(View view, int position) {
+        String selectedUser = members.get(position);
+        if (isManager && !selectedUser.equals(username) && !team.isFounder(selectedUser))
+        //only managers have access to the popup, and it is impossible to commit actions on yourself or on the founder
+        {
+            PopupMenu popup = new PopupMenu(this, view);
+            popup.inflate(R.menu.list_item_menu_members);
+            Menu menu = popup.getMenu();
+            if (team.isManager(selectedUser)) {
+                menu.findItem(R.id.action_promote).setVisible(false);
+                menu.findItem(R.id.action_demote).setVisible(isFounder);
+                menu.findItem(R.id.action_delete).setVisible(isFounder);
+            } else {
+                menu.findItem(R.id.action_promote).setVisible(isFounder);
+                menu.findItem(R.id.action_demote).setVisible(false);
+                menu.findItem(R.id.action_delete).setVisible(true);
+            }
+            popup.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == R.id.action_promote) {
+                    makeManager(members.get(position));
+                    return true;
+                } else if (item.getItemId() == R.id.action_delete) {
+                    removeUserFromTeam(members.get(position));
+                    return true;
+                } else if (item.getItemId() == R.id.action_demote) {
+                    demoteManager(members.get(position));
+                    return true;
+                }
+                return false;
             });
 
+            popup.show();
 
-
-            memberD.show(); }
+        }
     }
+
+
 
     //if the selected user isnt already a manager, they becomes one.
     private void makeManager(String newmanager) {

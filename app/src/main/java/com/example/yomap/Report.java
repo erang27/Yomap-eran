@@ -94,6 +94,6 @@ public class Report {
     @Override
     public String toString() {
 
-        return "sent by " + sender + " on " + UserSession.timeToString(date);
+        return "Sent by " + sender + " on " + UserSession.timeToString(date);
     }
 }
