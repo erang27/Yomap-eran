@@ -214,16 +214,20 @@ public class TeamActivity extends AppCompatActivity {
             else if (team.getMembers().size()>=2) {
                 makeManager(team.getMembers().get(1));
             }
-            else deleteTeam(); //if there are no other members, the team is removed when the founder leaves
+            else {
+                deleteTeam(); //if there are no other members, the team is removed when the founder leaves
+                return;
+            }
         }
-        removeUserFromTeam(username);
+        else {removeUserFromTeam(username); }
         finish();
     }
 
-    //erases the team by kicking all of the users out
+    //erases the team by kicking all of the users out //todo: fix crash
     private void deleteTeam() {
-        for (int i = 0; i<members.size(); i++) {
-            removeUserFromTeam(members.get(i));
+        List<String> membersCopy = new ArrayList<>(members);
+        for (int i = 0; i<membersCopy.size(); i++) {
+            removeUserFromTeam(membersCopy.get(i));
         }
         db.collection("Teams").document(id).delete()
                 .addOnSuccessListener(docRef -> {

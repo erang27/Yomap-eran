@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -70,6 +72,13 @@ public class ReportsActivity extends AppCompatActivity {
         recyclerViewReports = findViewById(R.id.reportList);
         recyclerViewReports.setLayoutManager(new LinearLayoutManager(this));
         sortby = findViewById(R.id.spinner);
+        ArrayAdapter<CharSequence> sortAdapter = ArrayAdapter.createFromResource(
+                this,
+                R.array.sort_options,
+                android.R.layout.simple_spinner_item
+        );
+        sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortby.setAdapter(sortAdapter);
         username = UserSession.getUsername();
         id = getIntent().getStringExtra("teamId");
         CollectionReference colRef = db.collection("Teams").document(id).collection("Reports");
@@ -101,12 +110,22 @@ public class ReportsActivity extends AppCompatActivity {
                                 );
 
                                 recyclerViewReports.setAdapter(adapter);
-
+                                sortReports(0); //starting up, the reports are sorted from newest to oldest
                             })
                             .addOnFailureListener(e ->
                                     Log.w("fail_load_reports", "fail loading reports", e));
                 });
+        sortby.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (adapter != null) {
+                    sortReports(position);
+                }
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
         back.setOnClickListener(v -> finish());
         newreport.setOnClickListener(v -> reportDialogNew());
      }
@@ -156,6 +175,7 @@ public class ReportsActivity extends AppCompatActivity {
                         .document(thisreport.getId()).update("status", position)
                         .addOnSuccessListener(docRef -> {
                             thisreport.setStatus(position);
+                            adapter.notifyDataSetChanged();
                         });
             }
 
@@ -164,6 +184,13 @@ public class ReportsActivity extends AppCompatActivity {
             }
         });
         reportVD.show();
+        Window window = reportVD.getWindow();
+        if (window != null) {
+            window.setLayout(
+                    (int)(getResources().getDisplayMetrics().widthPixels * 0.925),
+                    WindowManager.LayoutParams.WRAP_CONTENT
+            );
+        }
     }
     private void reportDialogNew() {
         if (reports != null) {
@@ -187,16 +214,27 @@ public class ReportsActivity extends AppCompatActivity {
                     String severityString = "Severity: " + severityVal;
                     severityDisplay.setText(severityString);
                 }
+
                 @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {}
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
                 @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {}
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
             });
             sendReport.setOnClickListener(v -> sendReport());
 
             reportD.show();
-        }
+            Window window = reportD.getWindow();
+            if (window != null) {
+                window.setLayout(
+                        (int) (getResources().getDisplayMetrics().widthPixels * 0.925),
+                        WindowManager.LayoutParams.WRAP_CONTENT
+                );
+            }
 
+        }
     }
 
 
@@ -212,6 +250,36 @@ public class ReportsActivity extends AppCompatActivity {
                     adapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e-> Log.w("SENDING", "fail sending report",e));
+    }
+
+    private void sortReports(int sortOption) {
+        switch (sortOption) {
+            case 0: // Newest First
+                Collections.sort(reports, (a, b) ->
+                        b.getDate().compareTo(a.getDate()));
+                break;
+            case 1: // Oldest First
+                Collections.sort(reports, (a, b) ->
+                        a.getDate().compareTo(b.getDate()));
+                break;
+            case 2: // Severity High to Low
+                Collections.sort(reports, (a, b) ->
+                        Integer.compare(b.getSeverity(), a.getSeverity()));
+                break;
+            case 3: // Severity Low to High
+                Collections.sort(reports, (a, b) ->
+                        Integer.compare(a.getSeverity(), b.getSeverity()));
+                break;
+            case 4: // Status Unresolved to Resolved
+                Collections.sort(reports, (a, b) ->
+                        Integer.compare(a.getStatus(), b.getStatus()));
+                break;
+            case 5: // Status Resolved to Unresolved
+                Collections.sort(reports, (a, b) ->
+                        Integer.compare(b.getStatus(), a.getStatus()));
+                break;
+        }
+        adapter.notifyDataSetChanged();
     }
 
 }

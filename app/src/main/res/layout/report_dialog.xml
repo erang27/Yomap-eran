@@ -7,8 +7,8 @@
 
     <EditText
         android:id="@+id/editIssue"
-        android:layout_width="415dp"
-        android:layout_height="238dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:ems="10"
         android:gravity="start|top"
         android:hint="Describe the issue"
@@ -21,8 +21,8 @@
 
     <EditText
         android:id="@+id/editGroup"
-        android:layout_width="414dp"
-        android:layout_height="42dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:ems="10"
         android:hint="Group"
         android:inputType="text"
@@ -34,9 +34,10 @@
 
     <SeekBar
         android:id="@+id/severityBar"
-        android:layout_width="324dp"
-        android:layout_height="55dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:max="9"
+        android:padding="5dp"
         app:layout_constraintBottom_toTopOf="@+id/sendReport"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

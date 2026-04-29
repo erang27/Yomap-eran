@@ -5,4 +5,12 @@
         <item>In progress</item>
         <item>Resolved</item>
     </string-array>
+    <string-array name="sort_options">
+        <item>Newest First</item>
+        <item>Oldest First</item>
+        <item>Severity (High to Low)</item>
+        <item>Severity (Low to High)</item>
+        <item>Status (Unresolved first)</item>
+        <item>Status (Resolved first)</item>
+    </string-array>
 </resources>
