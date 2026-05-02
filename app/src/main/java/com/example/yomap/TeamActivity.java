@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -122,6 +124,15 @@ public class TeamActivity extends AppCompatActivity {
                 editAddUserToTeam.setText("");
             });
             memberD.show();
+            Window window = memberD.getWindow();
+            if (window!=null){
+                window.setLayout(
+                        (int) (getResources().getDisplayMetrics().widthPixels * 0.925),
+                        WindowManager.LayoutParams.WRAP_CONTENT
+                );
+            }
+            membersView.getLayoutParams().height = (int)(getResources().getDisplayMetrics().heightPixels * 0.5);;
+            membersView.requestLayout(); //updates the list's height
         }
     }
     //handle click on member
@@ -219,13 +230,13 @@ public class TeamActivity extends AppCompatActivity {
                 return;
             }
         }
-        else {removeUserFromTeam(username); }
+        removeUserFromTeam(username);
         finish();
     }
 
     //erases the team by kicking all of the users out //todo: fix crash
     private void deleteTeam() {
-        List<String> membersCopy = new ArrayList<>(members);
+        List<String> membersCopy = new ArrayList<>(team.getMembers());
         for (int i = 0; i<membersCopy.size(); i++) {
             removeUserFromTeam(membersCopy.get(i));
         }

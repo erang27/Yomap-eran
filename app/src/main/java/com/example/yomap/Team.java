@@ -11,12 +11,14 @@ public class Team {
     private String founder;
     private List<String> managers;
     private List<String> users;
+    private List<String> pendingUsers;
     private List<Report> reports;
 
     public Team(String title) {
         this.title = title;
         this.founder = "";
         users = new ArrayList<>();
+        pendingUsers = new ArrayList<>();
         managers = new ArrayList<>();
         reports = new ArrayList<>();
     }
@@ -25,6 +27,7 @@ public class Team {
         this.founder ="";
         managers = new ArrayList<>();
         users = new ArrayList<>();
+        pendingUsers = new ArrayList<>();
         reports = new ArrayList<>();
     }
 
@@ -50,9 +53,17 @@ public class Team {
     }
     public void addManagers(String id) {managers.add(id);}
     public void addUsers(String id) {users.add(id);}
+    public void addPendingUsers(String id) {if (!isMember(id)) pendingUsers.add(id);}
     public void setTitle(String title) {
         this.title = title;
     }
+
+    public List<String> getPendingUsers() {
+        if (pendingUsers == null) pendingUsers = new ArrayList<>();
+        return pendingUsers;
+    }
+
+    public void setPendingUsers(List<String> pendingUsers) {this.pendingUsers = pendingUsers;}
 
     @PropertyName("users")
     public List<String> getMembers() {
@@ -91,6 +102,20 @@ public class Team {
         for (int i = 0; i < users.size() && !found; i++) {
             if (exmember.equals(users.get(i))) {
                 users.remove(i);
+                found = true;
+            }
+        }
+    }
+
+    //the method handles both accepting and rejecting members
+    public void unpendMember(String member, boolean gotin) {
+        if (gotin) {
+            addPendingUsers(member);
+        }
+        boolean found = false;
+        for (int i = 0; i < pendingUsers.size() && !found; i++) {
+            if (member.equals(pendingUsers.get(i))) {
+                pendingUsers.remove(i);
                 found = true;
             }
         }

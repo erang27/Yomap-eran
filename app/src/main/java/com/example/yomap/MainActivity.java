@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        scheduleDailyReminder();
+        //scheduleDailyReminder();
 
         //initializing components
         listView = findViewById(R.id.list);
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         logoutbtn = findViewById(R.id.logOut);
         username = UserSession.getUsername();
         //loading firebase teamlist
-        db.collection("Users").document(username).get()
+        /*db.collection("Users").document(username).get()
                 .addOnSuccessListener(doc -> {
                     User user = doc.toObject(User.class);
                     teams.clear();
@@ -86,9 +86,8 @@ public class MainActivity extends AppCompatActivity {
                     else {
                         Toast.makeText(MainActivity.this, "no teams found", Toast.LENGTH_SHORT).show();
                     }
-                });
-
-
+                }); */
+        loadteams();
         add.setOnClickListener(v-> addTeam());
         logoutbtn.setOnClickListener(v-> logOut());
         listView.setOnItemClickListener((parent, view, position, id) -> {
@@ -100,11 +99,47 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadteams();
+    }
 
+    //loads all of the teams, up to date with firebase data
+    private void loadteams() {
+        db.collection("Users").document(username).get()
+                .addOnSuccessListener(doc -> {
+                    User user = doc.toObject(User.class);
+                    teams.clear();
+                    if (user != null && user.getTeamIds() != null && !user.getTeamIds().isEmpty()) {
+                        db.collection("Teams")
+                                .whereIn(FieldPath.documentId(), user.getTeamIds())
+                                .get()
+                                .addOnSuccessListener(snapshot -> {
+                                    teams.clear();
+                                    for (DocumentSnapshot d : snapshot) {
+                                        Team t = d.toObject(Team.class);
+                                        if (t != null) {
+                                            t.setId(d.getId());
+                                            teams.add(t);
+                                        }
+                                    }
+                                    if (adapter == null) {
+                                        adapter = new ArrayAdapter<>(this,
+                                                android.R.layout.simple_list_item_1, teams);
+                                        listView.setAdapter(adapter);
+                                    }
+                                    adapter.notifyDataSetChanged();
+                                });
+                    } else {
+                        teams.clear();
+                        if (adapter != null) adapter.notifyDataSetChanged();
+                    }
+                });
+    }
 
 
     //opens a new team and adds it to firebase and listview
-    //todo: limit each user to 10 teams
     private void addTeam() {
         EditText input = new EditText(this);
 
@@ -141,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    //todo: delete or understand
     private void scheduleDailyReminder() {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, ReminderReceiver.class);
@@ -178,6 +214,7 @@ public class MainActivity extends AppCompatActivity {
             }
     );
 
+    //todo: delete or understand
     private void scheduleDailyReminderTest() {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, ReminderReceiver.class);
