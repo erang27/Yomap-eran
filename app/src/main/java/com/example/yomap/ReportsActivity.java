@@ -46,7 +46,7 @@ public class ReportsActivity extends AppCompatActivity {
     TextView severityDisplay, viewSender, viewGroup ,viewIssue, viewDate, viewSeverity;
     EditText editIssue, editGroup;
     SeekBar severityBar;
-    int severityVal;
+    int severityVal, sortOption;
     RecyclerView recyclerViewReports;
     Button back, newreport, sendReport;
     Spinner sortby, status;
@@ -119,7 +119,8 @@ public class ReportsActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (adapter != null) {
-                    sortReports(position);
+                    sortOption = position;
+                    sortReports(sortOption);
                 }
             }
 
@@ -156,14 +157,16 @@ public class ReportsActivity extends AppCompatActivity {
         );
 
         String severitys = "Severity: " +thisreport.getSeverity();
-        viewSender.setText(thisreport.getSender());
-        viewGroup.setText((thisreport.getGroup()));
-        viewDate.setText(UserSession.timeToString(thisreport.getDate()));
-        viewIssue.setText(thisreport.getIssue());
+        String senders = "Sender: " + thisreport.getSender();
+        String groups = "Group: " + thisreport.getGroup();
+        String dates = "Date: " + UserSession.timeToString(thisreport.getDate());
+        String issues = "Issue: " + thisreport.getIssue();
+        viewSender.setText(senders);
+        viewGroup.setText(groups);
+        viewDate.setText(dates);
+        viewIssue.setText(issues);
         viewSeverity.setText(severitys);
-
         status.setAdapter(adapter);
-        status.setSelection(thisreport.getStatus());
         status.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
@@ -175,7 +178,7 @@ public class ReportsActivity extends AppCompatActivity {
                         .document(thisreport.getId()).update("status", position)
                         .addOnSuccessListener(docRef -> {
                             thisreport.setStatus(position);
-                            adapter.notifyDataSetChanged();
+                            sortReports(sortOption);
                         });
             }
 
@@ -183,6 +186,7 @@ public class ReportsActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+        status.setSelection(thisreport.getStatus());
         reportVD.show();
         Window window = reportVD.getWindow();
         if (window != null) {

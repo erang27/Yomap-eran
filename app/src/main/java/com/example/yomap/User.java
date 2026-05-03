@@ -9,21 +9,18 @@ public class User {
     private String username;
     private String password;
     private ArrayList<String> teamIds;
-    private String Token;
 
 
     public User(String username, String password) {
         this.username = username;
         this.password = password;
         teamIds = new ArrayList<String>();
-        Token = "";
     }
 
     public User() {
         this.username = "";
         this.password = "";
         teamIds = new ArrayList<String>();
-        Token = "";
     }
 
     public String getUsername() {

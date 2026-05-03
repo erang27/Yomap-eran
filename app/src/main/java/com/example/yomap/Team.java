@@ -58,11 +58,13 @@ public class Team {
         this.title = title;
     }
 
+    @PropertyName("pendingMembers")
     public List<String> getPendingUsers() {
         if (pendingUsers == null) pendingUsers = new ArrayList<>();
         return pendingUsers;
     }
 
+    @PropertyName("pendingMembers")
     public void setPendingUsers(List<String> pendingUsers) {this.pendingUsers = pendingUsers;}
 
     @PropertyName("users")
@@ -110,7 +112,7 @@ public class Team {
     //the method handles both accepting and rejecting members
     public void unpendMember(String member, boolean gotin) {
         if (gotin) {
-            addPendingUsers(member);
+            addUsers(member);
         }
         boolean found = false;
         for (int i = 0; i < pendingUsers.size() && !found; i++) {
