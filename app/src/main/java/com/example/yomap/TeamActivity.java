@@ -124,8 +124,8 @@ public class TeamActivity extends AppCompatActivity {
             membersView = memberD.findViewById(R.id.membersList);
             membersView.setLayoutManager(new LinearLayoutManager(this));
             members = new ArrayList<>(team.getMembers());
-            adapterMember = new myAdapter(members, position -> {
-            }, (view,position) -> popupMembers(view, position));
+            adapterMember = new myAdapter<String>(members, position -> {
+            }, (view,position) -> popupMembers(view, position), user-> team.isManager(user));
             membersView.setAdapter(adapterMember);
             adapterMember.notifyDataSetChanged();
             addUserToTeam = memberD.findViewById(R.id.buttonAddToTeam);

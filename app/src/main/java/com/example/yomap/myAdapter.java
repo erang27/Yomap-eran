@@ -1,5 +1,6 @@
 package com.example.yomap;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.function.Predicate;
 
 public class myAdapter<T> extends RecyclerView.Adapter<myAdapter.ViewHolder> {
 
@@ -22,11 +24,17 @@ public class myAdapter<T> extends RecyclerView.Adapter<myAdapter.ViewHolder> {
     private ArrayList<T> items;
     private OnItemClickListener listenerShort;
     private OnItemLongClickListener listenerLong;
+    private Predicate<T> isManager;
 
     public myAdapter(ArrayList<T> items, OnItemClickListener listenerShort, OnItemLongClickListener listenerLong) {
         this.items = items;
         this.listenerShort = listenerShort;
         this.listenerLong = listenerLong;
+        isManager = null;
+    }
+    public myAdapter(ArrayList<T> items, OnItemClickListener listenerShort, OnItemLongClickListener listenerLong, Predicate<T> isManager) {
+        this(items, listenerShort, listenerLong);
+        this.isManager=isManager;
     }
 
     @Override
@@ -43,6 +51,8 @@ public class myAdapter<T> extends RecyclerView.Adapter<myAdapter.ViewHolder> {
         T item = items.get(position);
         String displayText = item+""; //will work regardless of item type as long the item has tostring
         holder.textView.setText(displayText);
+        if (isManager==null || !isManager.test(item)) holder.textView.setBackgroundColor(Color.WHITE);
+        else holder.textView.setBackgroundColor(Color.CYAN);
         // Regular click
         holder.textView.setOnClickListener(v -> {
             if (listenerShort != null) {
