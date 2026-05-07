@@ -247,7 +247,7 @@ public class TeamActivity extends AppCompatActivity {
         if (!gotin) {
             db.collection("Teams").document(id).update("pendingMembers", FieldValue.arrayRemove(user))
                     .addOnSuccessListener(docRef -> {
-                        team.unpendMember(user, false);
+                        team.unpendMember(user);
                         pendingMembers.remove(user);
                         adapterPending.notifyDataSetChanged();
                         Toast.makeText(this, "User rejected successfully", Toast.LENGTH_SHORT).show();
@@ -268,7 +268,7 @@ public class TeamActivity extends AppCompatActivity {
                     }
                     db.collection("Teams").document(id).update("pendingMembers", FieldValue.arrayRemove(user))
                             .addOnSuccessListener(docRef -> {
-                                team.unpendMember(user, true);
+                                team.unpendMember(user);
                                 pendingMembers.remove(user);
                                 adapterPending.notifyDataSetChanged();
                                 addUserToTeam(user);

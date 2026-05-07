@@ -109,8 +109,8 @@ public class Team {
         }
     }
 
-    //the method handles both accepting and rejecting members
-    public void unpendMember(String member, boolean gotin) {
+    //the method removes user from the pending list
+    public void unpendMember(String member) {
         boolean found = false;
         for (int i = 0; i < pendingUsers.size() && !found; i++) {
             if (member.equals(pendingUsers.get(i))) {
