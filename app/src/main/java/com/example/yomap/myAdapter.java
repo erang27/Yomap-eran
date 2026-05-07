@@ -51,7 +51,9 @@ public class myAdapter<T> extends RecyclerView.Adapter<myAdapter.ViewHolder> {
         T item = items.get(position);
         String displayText = item+""; //will work regardless of item type as long the item has tostring
         holder.textView.setText(displayText);
-        if (isManager==null || !isManager.test(item)) holder.textView.setBackgroundColor(Color.WHITE);
+        if (isManager==null || !isManager.test(item)) {
+            holder.textView.setBackgroundColor(Color.TRANSPARENT);
+        }
         else holder.textView.setBackgroundColor(Color.CYAN);
         // Regular click
         holder.textView.setOnClickListener(v -> {
