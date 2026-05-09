@@ -99,10 +99,15 @@ public class MainActivity extends AppCompatActivity {
                                     adapter.notifyDataSetChanged();
                                 });
                     } else {
-                        if (adapter != null) adapter.notifyDataSetChanged();
+                        teams.clear();
+                        if (adapter == null) {
+                            adapter = new ArrayAdapter<>(this,
+                                    android.R.layout.simple_list_item_1, teams);
+                            listView.setAdapter(adapter);
+                        }
+                        adapter.notifyDataSetChanged();
                     }
                 });
-
     }
 
 
