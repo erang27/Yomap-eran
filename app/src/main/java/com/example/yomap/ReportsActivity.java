@@ -81,40 +81,6 @@ public class ReportsActivity extends AppCompatActivity {
         sortby.setAdapter(sortAdapter);
         username = UserSession.getUsername();
         id = getIntent().getStringExtra("teamId");
-        CollectionReference colRef = db.collection("Teams").document(id).collection("Reports");
-        db.collection("Teams").document(id).get()
-                .addOnSuccessListener(docReff -> {
-                    team = docReff.toObject(Team.class);
-                    colRef.get()
-                            .addOnSuccessListener(docRef -> {
-
-                                reports.clear();
-
-                                for (DocumentSnapshot doc : docRef.getDocuments()) {
-                                    Report report = doc.toObject(Report.class);
-
-                                    if (report != null) {
-                                        report.setId(doc.getId());
-
-                                        if (team.isManager(username) || report.getSender().equals(username)) {
-                                            reports.add(report);
-                                        }
-                                    }
-                                }
-
-                                adapter = new myAdapter(
-                                        reports,
-                                        position -> reportDialogView(position),
-                                        (view, position) -> {
-                                        }
-                                );
-
-                                recyclerViewReports.setAdapter(adapter);
-                                sortReports(0); //starting up, the reports are sorted from newest to oldest
-                            })
-                            .addOnFailureListener(e ->
-                                    Log.w("fail_load_reports", "fail loading reports", e));
-                });
         sortby.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -129,7 +95,46 @@ public class ReportsActivity extends AppCompatActivity {
         });
         back.setOnClickListener(v -> finish());
         newreport.setOnClickListener(v -> reportDialogNew());
-     }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadReports();
+    }
+
+    private void loadReports() {
+        CollectionReference colRef = db.collection("Teams").document(id).collection("Reports");
+        db.collection("Teams").document(id).get()
+                .addOnSuccessListener(docReff -> {
+                    team = docReff.toObject(Team.class);
+                    if (team == null) return;
+                    colRef.get()
+                            .addOnSuccessListener(docRef -> {
+                                reports.clear();
+                                for (DocumentSnapshot doc : docRef.getDocuments()) {
+                                    Report report = doc.toObject(Report.class);
+                                    if (report != null) {
+                                        report.setId(doc.getId());
+                                        if (team.isManager(username) || report.getSender().equals(username)) {
+                                            reports.add(report);
+                                        }
+                                    }
+                                }
+                                if (adapter == null) {
+                                    adapter = new myAdapter(
+                                            reports,
+                                            position -> reportDialogView(position),
+                                            (view, position) -> {}
+                                    );
+                                    recyclerViewReports.setAdapter(adapter);
+                                }
+                                sortReports(sortOption);
+                            })
+                            .addOnFailureListener(e ->
+                                    Log.w("fail_load_reports", "fail loading reports", e));
+                });
+    }
 
     private void reportDialogView(int pos) {
         reportVD = new Dialog(this);
@@ -166,14 +171,14 @@ public class ReportsActivity extends AppCompatActivity {
         viewDate.setText(dates);
         viewIssue.setText(issues);
         viewSeverity.setText(severitys);
-        status.setAdapter(adapter);
-        status.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
+        status.setAdapter(adapter);
+        status.setSelection(thisreport.getStatus());
+        status.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(
                     AdapterView<?> parent, View view, int position, long ids) {
-                String selected = parent.getItemAtPosition(position).toString();
-                Log.d("SPINNER", "Selected: " + selected);
+                if (position == thisreport.getStatus()) return;
                 db.collection("Teams").document(id).collection("Reports")
                         .document(thisreport.getId()).update("status", position)
                         .addOnSuccessListener(docRef -> {
@@ -183,10 +188,8 @@ public class ReportsActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
-        status.setSelection(thisreport.getStatus());
         reportVD.show();
         Window window = reportVD.getWindow();
         if (window != null) {
@@ -287,4 +290,3 @@ public class ReportsActivity extends AppCompatActivity {
     }
 
 }
-

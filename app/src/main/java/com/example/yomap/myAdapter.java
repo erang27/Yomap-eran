@@ -43,7 +43,7 @@ public class myAdapter<T> extends RecyclerView.Adapter<myAdapter.ViewHolder> {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(android.R.layout.simple_list_item_1, parent, false);
 
-        return new ViewHolder(view, listenerShort);
+        return new ViewHolder(view);
     }
 
     @Override
@@ -55,18 +55,20 @@ public class myAdapter<T> extends RecyclerView.Adapter<myAdapter.ViewHolder> {
             holder.textView.setBackgroundColor(Color.TRANSPARENT);
         }
         else holder.textView.setBackgroundColor(Color.CYAN);
-        // Regular click
-        holder.textView.setOnClickListener(v -> {
+        holder.itemView.setOnClickListener(v -> {
             if (listenerShort != null) {
-                listenerShort.onClick(position);
+                int pos = holder.getBindingAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) listenerShort.onClick(pos);
             }
         });
 
-        // Long click
-        holder.textView.setOnLongClickListener(v -> {
+        holder.itemView.setOnLongClickListener(v -> {
             if (listenerLong != null) {
-                listenerLong.onClick(v, position);
-                return true; // consume the long click
+                int pos = holder.getBindingAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) {
+                    listenerLong.onClick(v, pos);
+                    return true;
+                }
             }
             return false;
         });
@@ -80,17 +82,9 @@ public class myAdapter<T> extends RecyclerView.Adapter<myAdapter.ViewHolder> {
     static class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView textView;
-
-        public ViewHolder(View itemView, OnItemClickListener listener) {
+        public ViewHolder(View itemView) {
             super(itemView);
-
             textView = itemView.findViewById(android.R.id.text1);
-
-            itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onClick(getAdapterPosition());
-                }
-            });
         }
     }
 }

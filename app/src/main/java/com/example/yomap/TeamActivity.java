@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,8 @@ public class TeamActivity extends AppCompatActivity {
     Button goHome, showMembers, moveToReport, addUserToTeam, buttonLeave, buttonRemove, buttonPend, buttonId;
     String id, username;
     Team team;
-    boolean isManager, isFounder;
+    boolean isManager, isFounder, leavingTeam = false;
+    ListenerRegistration teamListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,16 +85,26 @@ public class TeamActivity extends AppCompatActivity {
         });
         buttonId.setOnClickListener(v -> showId());
         buttonPend.setOnClickListener(v -> pendingMembersDialog());
-        buttonLeave.setOnClickListener(v -> leaveTeam());
-        buttonRemove.setOnClickListener(v -> deleteTeam());
-    }
+        buttonLeave.setOnClickListener(v -> {leavingTeam=true;  leaveTeam();});
+        buttonRemove.setOnClickListener(v ->{leavingTeam=true; deleteTeam();});
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        db.collection("Teams").document(id).get()
-                .addOnSuccessListener(docRef -> {
-                    team = docRef.toObject(Team.class);
+        // Real-time listener: fires immediately and whenever the team document changes or is deleted
+        teamListener = db.collection("Teams").document(id)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null) { Log.w("failgettingteam", "snapshot error", e); return; }
+                    if (snapshot == null || !snapshot.exists()) {
+                        Toast.makeText(this, "This team no longer exists", Toast.LENGTH_SHORT).show();
+                        finish();
+                        return;
+                    }
+                    team = snapshot.toObject(Team.class);
+                    if (team == null) { finish(); return; }
+                    if (!team.isMember(username) && !leavingTeam) {
+                        //handles members kicked out of the team
+                        Toast.makeText(this, "You have been kicked out of the team", Toast.LENGTH_SHORT).show();
+                        finish();
+                        return;
+                    }
                     teamView.setText(team.getTitle());
                     isManager = team.isManager(username);
                     isFounder = team.isFounder(username);
@@ -104,8 +116,13 @@ public class TeamActivity extends AppCompatActivity {
                         buttonPend.setVisibility(View.GONE);
                         spaceAboveMembers.setVisibility(View.GONE);
                     }
-                })
-                .addOnFailureListener(e -> Log.w("failgettingteam", "fail getting team", e));
+                });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (teamListener != null) teamListener.remove();
     }
 
     private void memberDialog() {
@@ -197,7 +214,7 @@ public class TeamActivity extends AppCompatActivity {
     // handle click on member
     private void popupMembers(View view, int position) {
         String selectedUser = members.get(position);
-        // only managers have access to the popup, and it is impossible to commit actions on yourself or on the founder
+        // only managers have access to the popup, and it is impossible to commit actions on yourself or on the founder, not on phantom users
         if (isManager && !selectedUser.equals(username) && !team.isFounder(selectedUser)) {
             PopupMenu popup = new PopupMenu(this, view);
             popup.inflate(R.menu.list_item_menu_members);
@@ -212,15 +229,20 @@ public class TeamActivity extends AppCompatActivity {
                 menu.findItem(R.id.action_delete).setVisible(true);
             }
             popup.setOnMenuItemClickListener(item -> {
-                if (item.getItemId() == R.id.action_promote) {
-                    makeManager(members.get(position), false);
-                    return true;
-                } else if (item.getItemId() == R.id.action_delete) {
-                    removeUserFromTeam(members.get(position), false);
-                    return true;
-                } else if (item.getItemId() == R.id.action_demote) {
-                    demoteManager(members.get(position));
-                    return true;
+                if (team.isMember(selectedUser)) {
+                    if (item.getItemId() == R.id.action_promote) {
+                        makeManager(members.get(position), false);
+                        return true;
+                    } else if (item.getItemId() == R.id.action_delete) {
+                        removeUserFromTeam(members.get(position), false);
+                        return true;
+                    } else if (item.getItemId() == R.id.action_demote) {
+                        demoteManager(members.get(position));
+                        return true;
+                    }
+                }
+                else {
+                    Toast.makeText(this, "Selected user is no longer part of this team", Toast.LENGTH_SHORT).show();
                 }
                 return false;
             });
@@ -311,17 +333,34 @@ public class TeamActivity extends AppCompatActivity {
     private void leaveTeam() {
         if (isFounder) {
             if (team.getManagers().size() >= 2) {
-                String newFounder = team.getManagers().get(1);
-                db.collection("Teams").document(id).update("founder", newFounder)
-                        .addOnSuccessListener(docRef -> team.setFounder(newFounder));
-            } else if (team.getMembers().size() >= 2) {
-                makeManager(team.getMembers().get(1),true);
-                return;
-            } else {
-                // if there are no other members, the team is removed when the founder leaves
-                deleteTeam();
-                return;
+                 String newFounder = null;
+                for (String m : team.getManagers()) {
+                    if (!m.equals(username)) { newFounder = m; break; }
+                }
+                if (newFounder != null) {
+                    //final is used here because lambda functions only take finals
+                    final String finalNewFounder = newFounder;
+                    db.collection("Teams").document(id).update("founder", finalNewFounder)
+                            .addOnSuccessListener(docRef -> {
+                                team.setFounder(finalNewFounder);
+                                removeUserFromTeam(username, true);
+                            });
+                    return;
+                }
             }
+            if (team.getMembers().size() >= 2) {
+                 String newManager = null;
+                for (String m : team.getMembers()) {
+                    if (!m.equals(username)) { newManager = m; break; }
+                }
+                if (newManager != null) {
+                    makeManager(newManager, true);
+                    return;
+                }
+            }
+            // no other members, delete the team
+            deleteTeam();
+            return;
         }
         removeUserFromTeam(username, true);
     }
@@ -352,13 +391,10 @@ public class TeamActivity extends AppCompatActivity {
     // erases the team by removing all users, then deletes the team document
     private void deleteTeam() {
         List<String> membersCopy = new ArrayList<>(team.getMembers());
-        // FIX: only remove teamId from each user's list — don't call the full removeUserFromTeam
-        // since the team document will be deleted anyway
-        for (String member : membersCopy) {
+         for (String member : membersCopy) {
             db.collection("Users").document(member)
                     .update("teamIds", FieldValue.arrayRemove(id));
         }
-        // FIX: finish() is now called inside the callback, after the team is deleted
         db.collection("Teams").document(id).delete()
                 .addOnSuccessListener(docRef -> {
                     Log.w("DELETE_TEAM", "team removed successfully");
